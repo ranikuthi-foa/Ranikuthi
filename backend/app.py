@@ -39,3 +39,12 @@ def get_flats():
         return response.data
     except Exception as e:
         return {"error": str(e)}
+
+@app.get("/tables")
+def list_tables():
+    try:
+        response = supabase.rpc("pg_tables").execute()
+        return response.data
+    except Exception as e:
+        return {"error": str(e)}
+
