@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from supabase import create_client
 import os
+import time
+import requests
+import threading   # ← this was missing
 
 app = FastAPI()
 
