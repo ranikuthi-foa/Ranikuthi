@@ -12,7 +12,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 def keep_awake():
     while True:
         try:
-            requests.get("https://yourapp.onrender.com/")
+            requests.get("https://ranikuthi.onrender.com//")
         except Exception as e:
             print("Keep-alive failed:", e)
         time.sleep(300)  # every 5 minutes
