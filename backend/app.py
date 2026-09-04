@@ -31,7 +31,7 @@ def root():
 def get_users():
     try:
         response = supabase.table("users").select("*").execute()
-        return response.data
+        return response.data  # returns [] if table is empty
     except Exception as e:
         return {"error": str(e)}
 
