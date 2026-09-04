@@ -11,6 +11,10 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+@app.get("/")
+def root():
+    return {"message": "Hello from Render + Supabase!"}
+
 @app.get("/users")
 def get_users():
     response = supabase.table("users").select("*").execute()
