@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { apiRequest } from '../../api/client';
-import { useAuth } from '../../auth/AuthContext';
+import { useAuth } from '../../auth/AuthContext
+
+const SETTING_OPTIONS = {function renderInput() {
+  BILLING_RATE_MODE: ['PER_SQFT', 'GLOBAL_FLAT'],
+  PENALTY_MODE: ['FLAT_RATE', 'PERCENTAGE', 'PER_DAY'],
+};
 
 function SettingRow({ setting, currentRole, onSaved }) {
   const [editing, setEditing] = useState(false);
@@ -25,6 +30,16 @@ function SettingRow({ setting, currentRole, onSaved }) {
   }
 
   function renderInput() {
+    const fixedOptions = SETTING_OPTIONS[setting.setting_key];
+    if (fixedOptions) {
+      return (
+        <select value={value} onChange={(e) => setValue(e.target.value)} style={{ width: 200, padding: '0.4em 0.6em', border: '1px solid var(--color-border)', borderRadius: 4 }}>
+          {fixedOptions.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      );
+    }
     if (setting.value_type === 'BOOLEAN') {
       return (
         <select value={value} onChange={(e) => setValue(e.target.value)} style={{ width: 140, padding: '0.4em 0.6em', border: '1px solid var(--color-border)', borderRadius: 4 }}>
