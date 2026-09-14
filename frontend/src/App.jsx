@@ -23,10 +23,10 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/admin"
+          <Route
+            path="/admin"
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}>
-                <Route path="settings" element={<Settings />} />
                 <AdminLayout />
               </ProtectedRoute>
             }
@@ -35,6 +35,7 @@ export default function App() {
             <Route path="members" element={<Members />} />
             <Route path="bills" element={<Bills />} />
             <Route path="receipts" element={<Receipts />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="/" element={<Navigate to="/admin" replace />} />
         </Routes>
