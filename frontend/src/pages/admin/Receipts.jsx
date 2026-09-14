@@ -37,19 +37,20 @@ export default function Receipts() {
   }, [selectedFlatId]);
 
   async function loadReceipts(flatId) {
+    if (!flatId) return;
     setLoading(true);
     setError(null);
     try {
-      // No dedicated "list receipts by flat" endpoint exists yet — reusing
-      // the flat statement's underlying data isn't available as JSON, so
-      // for now we filter bills' own receipt history isn't exposed either.
-      // Using the statement endpoint's PDF isn't right here — flagging this
-      // as a real gap: build GET /billing/receipts?flat_id= next session.
-      setReceipts([]);
+      const data = await apiRequest(`/billing/receipts?flat_id=${flatId}`);
+      setReceipts(data.receipts);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => { loadReceipts(selectedFlatId); }, [selectedFlatId]);
 
   async function handlePay(e) {
     e.preventDefault();
@@ -65,12 +66,12 @@ export default function Receipts() {
         body.concession_paise = Number(formData.concession_paise);
         body.committee_advice_note = formData.committee_advice_note || undefined;
       }
-      const result = await apiRequest('/billing/receipts', { method: 'POST', body });
+      await apiRequest('/billing/receipts', { method: 'POST', body });
       setFormData({ payment_mode: 'CASH', paid_amount_paise: '', concession_paise: '', committee_advice_note: '' });
       setShowForm(false);
       const billsData = await apiRequest(`/billing/bills?flat_id=${selectedFlatId}`);
       setBills(billsData.bills);
-      setReceipts((prev) => [result.receipt, ...prev]);
+      await loadReceipts(selectedFlatId);
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -82,9 +83,9 @@ export default function Receipts() {
     if (!voidReason) return;
     try {
       await apiRequest(`/billing/receipts/${receiptId}/void`, { method: 'POST', body: { void_reason: voidReason } });
-      setReceipts((prev) => prev.map((r) => (r.id === receiptId ? { ...r, receipt_status: 'VOID', void_reason: voidReason } : r)));
       setVoidingId(null);
       setVoidReason('');
+      await loadReceipts(selectedFlatId);
     } catch (err) {
       alert(err.message);
     }
@@ -197,11 +198,7 @@ export default function Receipts() {
 
       {loading && <p>Loading…</p>}
       {error && <p className="error-text">{error}</p>}
-      <DataTable columns={columns} rows={receipts} emptyMessage="No receipts logged in this session yet for this flat — receipt history browsing isn't built yet (see note below)." />
-
-      <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: '1.5em', fontStyle: 'italic' }}>
-        Note: this page only shows receipts logged in your current browser session — there's no backend endpoint yet to fetch a flat's full historical receipt list. That's a real gap, not a UI bug; worth building next.
-      </p>
+      <DataTable columns={columns} rows={receipts} emptyMessage="No receipts logged for this flat yet." />
     </div>
   );
 }
