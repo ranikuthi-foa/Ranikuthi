@@ -34,3 +34,7 @@ export async function apiRequest(path, { method = 'GET', body, skipAuth = false 
   }
   return data;
 }
+
+export function absoluteUrl(path) {
+  return `${BASE_URL}${path}`;
+}
