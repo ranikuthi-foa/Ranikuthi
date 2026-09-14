@@ -5,6 +5,7 @@ import AdminLayout from './layouts/AdminLayout';
 import Members from './pages/admin/Members';
 import Bills from './pages/admin/Bills';
 import Receipts from './pages/admin/Receipts';
+import Settings from './pages/admin/Settings';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -22,10 +23,10 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/admin"
+          <Route path="/admin"
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'COMMITTEE']}>
+                <Route path="settings" element={<Settings />} />
                 <AdminLayout />
               </ProtectedRoute>
             }
