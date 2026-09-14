@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiRequest } from '../../api/client';
+import { apiRequest, absoluteUrl } from '../../api/client';
 import DataTable from '../../components/DataTable';
 
 const rupees = (paise) => `Rs. ${(Number(paise) / 100).toFixed(2)}`;
@@ -95,7 +95,7 @@ export default function Receipts() {
     try {
       const path = isVoidCopy ? `/documents/receipt/${receiptId}/void-download` : `/documents/receipt/${receiptId}/download`;
       const data = await apiRequest(path);
-      window.open(data.url, '_blank');
+      window.open(absoluteUrl(data.url), '_blank');
     } catch (err) {
       alert(err.message);
     }
