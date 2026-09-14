@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './auth/AuthContext';
 import Login from './pages/Login';
 import AdminLayout from './layouts/AdminLayout';
 import Members from './pages/admin/Members';
+import Bills from './pages/admin/Bills';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -30,7 +31,7 @@ export default function App() {
           >
             <Route index element={<Navigate to="members" replace />} />
             <Route path="members" element={<Members />} />
-            <Route path="bills" element={<p>Bills — coming next</p>} />
+            <Route path="bills" element={<Bills />} />
             <Route path="receipts" element={<p>Receipts — coming next</p>} />
           </Route>
           <Route path="/" element={<Navigate to="/admin" replace />} />
