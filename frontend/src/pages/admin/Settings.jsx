@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { apiRequest } from '../../api/client';
 import { useAuth } from '../../auth/AuthContext
 
-const SETTING_OPTIONS = {function renderInput() {
-  BILLING_RATE_MODE: ['PER_SQFT', 'GLOBAL_FLAT'],
-  PENALTY_MODE: ['FLAT_RATE', 'PERCENTAGE', 'PER_DAY'],
-};
+  const SETTING_OPTIONS = {function renderInput() {
+    BILLING_RATE_MODE: ['PER_SQFT', 'GLOBAL_FLAT'],
+    PENALTY_MODE: ['FLAT_RATE', 'PERCENTAGE', 'PER_DAY'],
+  };
 
 function SettingRow({ setting, currentRole, onSaved }) {
   const [editing, setEditing] = useState(false);
