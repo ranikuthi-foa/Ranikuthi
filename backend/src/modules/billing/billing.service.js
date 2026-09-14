@@ -191,4 +191,14 @@ async function getBillsForFlat(flatId) {
   return { ok: true, bills: data };
 }
 
+async function getReceiptsForFlat(flatId) {
+  const { data, error } = await supabase
+    .from('payment_receipts')
+    .select('*')
+    .eq('flat_id', flatId)
+    .order('created_timestamp', { ascending: false });
+  if (error) return { ok: false, status: 500, message: error.message };
+  return { ok: true, receipts: data };
+}
+
 module.exports = { generateMaintenanceBill, getBillsForFlat, resolveBaseCharge, calculateFine };
