@@ -5,6 +5,7 @@ const { generateMaintenanceBill, getBillsForFlat } = require('./billing.service'
 const supabase = require('../../db');
 const { recordPayment, voidReceipt } = require('./receipts.service');
 const { createVoucher, approveVoucher } = require('./vouchers.service');
+const { generateMaintenanceBill, getBillsForFlat, getReceiptsForFlat } = require('./billing.service');
 
 router.post('/bills/generate', requireAuth, requirePermission('BILLING.BILL_GENERATE'), async (req, res) => {
   const result = await generateMaintenanceBill(req.user.id, req.user.role_name, req.body);
@@ -75,6 +76,19 @@ router.post('/misc-receipts/:id/void', requireAuth, requirePermission('BILLING.M
   const result = await voidMiscReceipt(req.user.id, req.user.role_name, req.params.id, req.body.void_reason);
   if (!result.ok) return res.status(result.status).json({ error: result.message });
   res.json(result);
+});
+
+// Same data-scoping pattern as GET /bills — RESIDENT sees only their own flat.
+router.get('/receipts', requireAuth, async (req, res) => {
+  let flatId = req.query.flat_id;
+  if (req.user.role_name === 'RESIDENT') {
+    if (!req.user.flat_id) return res.status(403).json({ error: 'No flat linked to this account.' });
+    flatId = req.user.flat_id;
+  }
+  if (!flatId) return res.status(400).json({ error: 'flat_id query parameter is required.' });
+  const result = await getReceiptsForFlat(flatId);
+  if (!result.ok) return res.status(result.status).json({ error: result.message });
+  res.json({ receipts: result.receipts });
 });
 
 module.exports = router;
