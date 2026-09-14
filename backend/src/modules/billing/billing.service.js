@@ -201,4 +201,4 @@ async function getReceiptsForFlat(flatId) {
   return { ok: true, receipts: data };
 }
 
-module.exports = { generateMaintenanceBill, getBillsForFlat, resolveBaseCharge, calculateFine };
+module.exports = { generateMaintenanceBill, getBillsForFlat, getReceiptsForFlat, resolveBaseCharge, calculateFine };
