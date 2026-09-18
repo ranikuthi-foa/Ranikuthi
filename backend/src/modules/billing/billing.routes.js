@@ -4,10 +4,9 @@ const { requireAuth, requirePermission } = require('../auth/auth.middleware');
 const { generateMaintenanceBill, getBillsForFlat, getReceiptsForFlat } = require('./billing.service');
 const supabase = require('../../db');
 const { recordPayment, voidReceipt } = require('./receipts.service');
-const { createVoucher, approveVoucher } = require('./vouchers.service');
+const { createVoucher, approveVoucher, listVouchers } = require('./vouchers.service');
 const { createMiscBill, listMiscBills, recordMiscReceipt, voidMiscReceipt } = require('./misc.service');
 const { generateStatementPdf } = require('../../services/statement.service');
-const { createVoucher, approveVoucher, listVouchers } = require('./vouchers.service');  
 
 router.post('/bills/generate', requireAuth, requirePermission('BILLING.BILL_GENERATE'), async (req, res) => {
   const result = await generateMaintenanceBill(req.user.id, req.user.role_name, req.body);
