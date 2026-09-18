@@ -6,6 +6,7 @@ import Members from './pages/admin/Members';
 import Bills from './pages/admin/Bills';
 import Receipts from './pages/admin/Receipts';
 import Settings from './pages/admin/Settings';
+import Vouchers from './pages/admin/Vouchers';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="bills" element={<Bills />} />
             <Route path="receipts" element={<Receipts />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="vouchers" element={<Vouchers />} />
           </Route>
           <Route path="/" element={<Navigate to="/admin" replace />} />
         </Routes>
