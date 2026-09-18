@@ -7,6 +7,7 @@ const { recordPayment, voidReceipt } = require('./receipts.service');
 const { createVoucher, approveVoucher } = require('./vouchers.service');
 const { createMiscBill, listMiscBills, recordMiscReceipt, voidMiscReceipt } = require('./misc.service');
 const { generateStatementPdf } = require('../../services/statement.service');
+const { createVoucher, approveVoucher, listVouchers } = require('./vouchers.service');  
 
 router.post('/bills/generate', requireAuth, requirePermission('BILLING.BILL_GENERATE'), async (req, res) => {
   const result = await generateMaintenanceBill(req.user.id, req.user.role_name, req.body);
@@ -61,6 +62,12 @@ router.post('/vouchers/:id/approve', requireAuth, requirePermission('BILLING.VOU
   const result = await approveVoucher(req.user.id, req.user.role_name, req.params.id, req.body.decision);
   if (!result.ok) return res.status(result.status).json({ error: result.message });
   res.json({ voucher: result.voucher });
+});
+
+router.get('/vouchers', requireAuth, requirePermission('BILLING.VOUCHER_VIEW'), async (req, res) => {
+  const result = await listVouchers(req.query);
+  if (!result.ok) return res.status(result.status).json({ error: result.message });
+  res.json({ vouchers: result.vouchers });
 });
 
 router.post('/misc-bills', requireAuth, requirePermission('BILLING.MISC_BILL_MANAGE'), async (req, res) => {
