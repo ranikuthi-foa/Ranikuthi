@@ -128,4 +128,12 @@ async function approveVoucher(actorUserId, actorRole, voucherId, decision) {
   return { ok: true, voucher: updated };
 }
 
-module.exports = { createVoucher, approveVoucher };
+async function listVouchers(filters = {}) {
+  let query = supabase.from('expenses_vouchers').select('*').order('created_timestamp', { ascending: false });
+  if (filters.approval_status) query = query.eq('approval_status', filters.approval_status);
+  const { data, error } = await query;
+  if (error) return { ok: false, status: 500, message: error.message };
+  return { ok: true, vouchers: data };
+}
+
+module.exports = { createVoucher, approveVoucher, listVouchers };
