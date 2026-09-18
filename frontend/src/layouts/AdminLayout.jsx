@@ -5,8 +5,9 @@ const NAV_ITEMS = [
   { to: '/admin/members', label: 'Members & Flats' },
   { to: '/admin/bills', label: 'Bills' },
   { to: '/admin/receipts', label: 'Receipts' },
-  { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/vouchers', label: 'Vouchers' },
+  { to: '/admin/complaints', label: 'Complaints' },
+  { to: '/admin/settings', label: 'Settings' },
 ];
 
 export default function AdminLayout() {
