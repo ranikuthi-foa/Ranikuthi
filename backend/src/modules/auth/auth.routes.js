@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const supabase = require('../../db');
-const { login, logout, hashPassword, generateSalt } = require('./auth.service');
+const { login, logout, hashPassword, generateSalt, listUsers, createUser, updateUser } = require('./auth.service');
 const { requireAuth, requirePermission } = require('./auth.middleware');
 const { requestOtp, verifyOtp } = require('./otp.service');
 
@@ -116,6 +116,24 @@ router.post('/admin/reset/confirm', requireAuth, requirePermission('AUTH.ADMIN_R
     status: 'Password reset.',
     temp_password: new_password ? undefined : tempPassword,
   });
+});
+
+router.get('/admin/users', requireAuth, requirePermission('AUTH.USER_MANAGE'), async (req, res) => {
+  const result = await listUsers();
+  if (!result.ok) return res.status(result.status).json({ error: result.message });
+  res.json({ users: result.users });
+});
+
+router.post('/admin/users', requireAuth, requirePermission('AUTH.USER_MANAGE'), async (req, res) => {
+  const result = await createUser(req.user.id, req.user.role_name, req.body);
+  if (!result.ok) return res.status(result.status).json({ error: result.message });
+  res.status(201).json({ user: result.user, temp_password: result.temp_password });
+});
+
+router.patch('/admin/users/:id', requireAuth, requirePermission('AUTH.USER_MANAGE'), async (req, res) => {
+  const result = await updateUser(req.user.id, req.user.role_name, req.params.id, req.body);
+  if (!result.ok) return res.status(result.status).json({ error: result.message });
+  res.json({ user: result.user });
 });
 
 module.exports = router;
