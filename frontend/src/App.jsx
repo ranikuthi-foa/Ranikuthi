@@ -8,6 +8,7 @@ import Receipts from './pages/admin/Receipts';
 import Settings from './pages/admin/Settings';
 import Vouchers from './pages/admin/Vouchers';
 import Complaints from './pages/admin/Complaints';
+import Users from './pages/admin/Users';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="vouchers" element={<Vouchers />} />
             <Route path="complaints" element={<Complaints />} />
+            <Route path="users" element={<Users />} />
           </Route>
           <Route path="/" element={<Navigate to="/admin" replace />} />
         </Routes>
