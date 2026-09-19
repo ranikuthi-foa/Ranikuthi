@@ -156,6 +156,94 @@ async function verifySessionToken(token) {
   };
 }
 
+async function listUsers() {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, full_name, mobile_number, email_address, role_name, flat_id, account_status, force_password_reset, created_timestamp')
+    .order('created_timestamp', { ascending: false });
+  if (error) return { ok: false, status: 500, message: error.message };
+  return { ok: true, users: data };
+}
+
+async function createUser(actorUserId, actorRole, input) {
+  const { full_name, mobile_number, email_address, role_name, flat_id } = input;
+  if (!full_name || !mobile_number || !role_name) {
+    return { ok: false, status: 400, message: 'full_name, mobile_number, and role_name are required.' };
+  }
+
+  const tempPassword = crypto.randomBytes(6).toString('hex');
+  const salt = generateSalt();
+  const hash = hashPassword(tempPassword, salt);
+
+  const { data: user, error } = await supabase
+    .from('users')
+    .insert({
+      full_name, mobile_number, email_address: email_address || null,
+      role_name, flat_id: flat_id || null,
+      password_hash: hash, password_salt: salt,
+      account_status: 'ACTIVE', force_password_reset: true,
+      created_by: actorUserId,
+    })
+    .select('id, full_name, mobile_number, role_name, flat_id, account_status')
+    .single();
+
+  if (error) {
+    if (error.code === '23505') return { ok: false, status: 409, message: 'A user with this mobile number already exists.' };
+    return { ok: false, status: 500, message: error.message };
+  }
+
+  await supabase.from('system_audit_trail').insert({
+    actor_user_id: actorUserId, actor_role: actorRole,
+    action_type: 'USER_CREATED', target_module: 'AUTH', target_table: 'users', record_key: user.id,
+  });
+
+  return { ok: true, user, temp_password: tempPassword };
+}
+
+// L-26: at least two ACTIVE Admins must exist at all times — enforced here,
+// the one place role/status changes actually happen, rather than left as
+// an assumption. Blocks the specific change that would break the invariant,
+// not the whole update.
+async function updateUser(actorUserId, actorRole, targetUserId, input) {
+  const { role_name, flat_id, account_status, email_address } = input;
+
+  const { data: target, error: fetchError } = await supabase
+    .from('users').select('id, role_name, account_status').eq('id', targetUserId).single();
+  if (fetchError || !target) return { ok: false, status: 404, message: 'User not found.' };
+
+  const losingAdminStatus =
+    target.role_name === 'ADMIN' &&
+    ((role_name && role_name !== 'ADMIN') || (account_status && account_status !== 'ACTIVE'));
+
+  if (losingAdminStatus) {
+    const { count } = await supabase
+      .from('users').select('id', { count: 'exact', head: true })
+      .eq('role_name', 'ADMIN').eq('account_status', 'ACTIVE');
+    if ((count || 0) <= 2) {
+      return { ok: false, status: 409, message: 'Cannot proceed — at least two active Admins must exist at all times (L-26).' };
+    }
+  }
+
+  const update = {};
+  if (role_name) update.role_name = role_name;
+  if (flat_id !== undefined) update.flat_id = flat_id || null;
+  if (account_status) update.account_status = account_status;
+  if (email_address !== undefined) update.email_address = email_address || null;
+
+  const { data: updated, error } = await supabase
+    .from('users').update(update).eq('id', targetUserId)
+    .select('id, full_name, mobile_number, role_name, flat_id, account_status, email_address').single();
+  if (error) return { ok: false, status: 500, message: error.message };
+
+  await supabase.from('system_audit_trail').insert({
+    actor_user_id: actorUserId, actor_role: actorRole,
+    action_type: 'USER_UPDATED', target_module: 'AUTH', target_table: 'users',
+    record_key: targetUserId, change_details: update,
+  });
+
+  return { ok: true, user: updated };
+}
+
 async function logout(userId) {
   await supabase
     .from('users')
@@ -164,4 +252,4 @@ async function logout(userId) {
   await logAudit(userId, 'LOGOUT');
 }
 
-module.exports = { login, verifySessionToken, logout, hashPassword, generateSalt };
+module.exports = { login, verifySessionToken, logout, hashPassword, generateSalt, listUsers, createUser, updateUser };
