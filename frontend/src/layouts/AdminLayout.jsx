@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 
 const NAV_ITEMS = [
   { to: '/admin/members', label: 'Members & Flats' },
+  { to: '/admin/users', label: 'Users' },
   { to: '/admin/bills', label: 'Bills' },
   { to: '/admin/receipts', label: 'Receipts' },
   { to: '/admin/vouchers', label: 'Vouchers' },
